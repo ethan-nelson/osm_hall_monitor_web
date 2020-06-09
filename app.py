@@ -27,7 +27,7 @@ login_manager.init_app(app)
 
 db = SQLAlchemy(app)
 
-class User(db.Model):
+class User(db.Model, UserMixin):
     __tablename__ = 'registered_users'
     id = db.Column(db.BigInteger, primary_key=True, nullable=False)
     username = db.Column(db.Text)
@@ -37,20 +37,8 @@ class User(db.Model):
         self.id = id
         self.username = username
 
-    def is_authenticated(self):
-        return True
-
-    def is_active(self):
-        return True
-
     def is_admin(self):
         return role
-
-    def is_anonymous(self):
-        return False
-
-    def get_id(self):
-        return self.id
 
     def __unicode__(self):
         return self.username
