@@ -1,0 +1,18 @@
+<div class="row">
+    <div>
+        OpenStreetMap Hall Monitor
+    </div>
+    <div>
+        <ul>
+            {% if current_user.is_authenticated  %}
+            <li>Hey, {{ current_user.username }}</li>
+            <li>User Activity</li>
+            <li>Object Activity</li>
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+            {% else %}
+            <li><a href="{{ url_for('login') }}">Login</a></li>
+            {% endif %}
+        </ul>
+    </div>
+</div>
+

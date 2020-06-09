@@ -1,0 +1,11 @@
+{% extends "default.html" %}
+
+{% block content %}
+
+<p>Welcome to the OpenStreetMap Hall Monitor. The Hall Monitor is a passive monitoring tool for OSM, scouring planet diff files in search for events you are interested.</p>
+
+<p>To get started, please <a href="{{ url_for('login') }}">log in</a> through OpenStreetMap. Once logged in, use the header links to add any objects, users, or tags you are interested in tracking to their respective watchlists.</p>
+
+<p>To view the source code or report any bugs, check out the <a href="http://github.com/ethan-nelson/osm_hall_monitor_web" target="_blank">web frontend</a> and <a href="http://github.com/ethan-nelson/osm_hall_monitor" target="_blank">analysis code</a> repositories on GitHub.</p>
+
+{% endblock %}

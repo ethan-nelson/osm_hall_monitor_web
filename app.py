@@ -133,7 +133,7 @@ def authorize():
 @app.route('/')
 @app.route('/web')
 def home():
-    return flask.render_template('index.html')
+    return flask.render_template('home.html')
 
 
 def check_user(user_id, user_name):

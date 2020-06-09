@@ -1,0 +1,23 @@
+<div>
+    {% if current_user.is_authenticated %}
+    <div>
+        Users:
+        <ul>
+            <li>User activity list</li>
+            <li>Users watched by you</li>
+            <li>Add a user</li>
+        </ul>
+    </div>
+    <div>
+        Objects:
+        <ul>
+            <li>Object activity list</li>
+            <li>Objects watched by you</li>
+            <li>Add an object</li>
+        </ul>
+    </div>
+    <div>
+        Last Update Time: 
+    </div>
+    {% endif %}
+</div>
