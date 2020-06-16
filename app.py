@@ -11,8 +11,13 @@ from osmhm.models import (
 from flask import request
 from flask_login import login_user, logout_user, current_user, LoginManager, UserMixin, login_required
 from flask_sqlalchemy import SQLAlchemy
+from flask_wtf import FlaskForm
 from authlib.integrations.flask_client import OAuth
 from xml.etree import ElementTree
+from wtforms import (
+    SelectField,
+    TextField,
+)
 import os
 
 
@@ -211,10 +216,9 @@ def action(action, kind, id=None):
     elif action == 'add':
         if id is not None:
             return 'Do not specify an id on add', 400
-        if kind == 'user':
-            osmhm.manage.add_watched_user(request.params['item'], request.params['reason'])
-        elif kind == 'object':
-            pass
+        form = AddForm()
+        if not form.is_submitted():
+            return flask.render_template('add.html', form=form, url_type=kind)
 
     elif action == 'edit':
         pass

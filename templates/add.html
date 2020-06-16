@@ -1,0 +1,22 @@
+{% extends "default.html" %}
+
+{% block content %}
+
+<h2>Adding a {{ url_type }} to watch</h2>
+
+{% if url_type == 'object' %}
+<p>The object must follow this format: [nwr]\d{1,9}, where the letter indicates <b>node</b>, <b>way</b>, or <b>relation</b>, and the numbers following are a <i>non-padded element id</i>.</p>
+<p>For example, to follow a node with id 325, you would use 'n325'.</p>
+{% endif %}
+{% if url_type == 'user' %}
+<p>Here you can add a user to be tracked. When you add someone by username, you run the risk of that user changing their username.</p>
+<p>To track by a user ID (which cannot be changed), visit <a href="/html/add/userid/">this link</a>.</p>
+{% endif %}
+<form method="POST" action="/html/add/{{ url_type }}">
+    {{ form.csrf_token }}
+    {{ url_type }} {{ form.element }}<br />
+    {{ form.reason.label }} {{ form.reason }}<br />
+    {{ form.email.label }} {{ form.email }}<br />
+</form>
+
+{% endblock %}
