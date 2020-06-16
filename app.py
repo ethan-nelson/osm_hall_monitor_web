@@ -248,14 +248,30 @@ def action(action, kind, id=None):
             return 'You must specify an id on edit', 400
 
     return api_action(kind, id, request)
-        
 
+
+@app.route('/html/profile')
+@app.route('/profile')
+@login_required
+def profile():
+    if request.method == 'UPDATE':
+        update_user(request)
+    elif request.method == 'DELETE':
+        delete_user(request)
+        return flask.redirect('/')
+
+    user_info = load_user(user_id)
+    return flask.render_template('user.html', info=user_info)
+
+
+@app.route('/html/login')
 @app.route('/login')
 def login():
     redirect_uri = flask.url_for('authorize', _external=True)
     return oauth.osm.authorize_redirect(redirect_uri)
 
 
+@app.route('/html/logout')
 @app.route('/logout')
 @login_required
 def logout():
@@ -263,6 +279,7 @@ def logout():
     return flask.redirect('/')
 
 
+@app.route('/html/authorize')
 @app.route('/authorize')
 def authorize():
     token = oauth.osm.authorize_access_token()
