@@ -250,8 +250,14 @@ def authorize():
     return flask.redirect('/')
 
 
+@app.route('/html/privacy')
+@app.route('/privacy')
+def privacy():
+    return flask.render_template('privacy.html')
+
+
+@app.route('/html')
 @app.route('/')
-@app.route('/web')
 def home():
     return flask.render_template('home.html')
 
