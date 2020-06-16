@@ -58,44 +58,63 @@ class User(db.Model, UserMixin):
     def __unicode__(self):
         return self.username
 
+class AddForm(FlaskForm):
+    element = TextField('element')
+    reason = TextField('reason')
+    email = SelectField('email')
+
 
 def add_watched_user(username, reason, watch_username, watch_userid, email):
     user = Watched_Users(username=username, reason=reason, watch_username=watch_username, watch_userid=watch_userid, email=email)
     db.session.add(user)
     db.session.commit()
+    return user.id
 
 def add_watched_object(object, reason, watch_username, watch_userid, email):
     obj = Watched_Objects(object=object, reason=reason, watch_username=watch_username, watch_userid=watch_userid, email=email)
     db.session.add(obj)
     db.session.commit()
+    return obj.id
 
 def edit_watched_user(username, reason, watch_userid, email):
     user = db.session.query(Watched_Users).get(id)
-    if user.authorid == watch_userid:
+    if user and user.authorid == watch_userid:
         user.reason = reason
         user.email = email
         db.session.add(user)
         db.session.commit()
+        return user
+    else:
+        return None
 
 def edit_watched_object(object, reason, watch_userid, email):
     obj = db.session.query(Watched_Objects).get(id)
-    if obj.authorid == watch_userid:
+    if obj and obj.authorid == watch_userid:
         user.reason = reason
         user.email = email
         db.session.add(obj)
         db.session.commit()
+        return obj
+    else:
+        return None
 
 def remove_watched_user(id, watch_userid):
     result = db.session.query(Watched_Users).get(id)
-    if result.authorid == watch_userid:
+    if result and result.authorid == watch_userid:
         db.session.delete(result)
         db.session.commit()
+        return {'ok': True}
+    else:
+        return None
 
 def remove_watched_object(id, watch_userid):
     result = db.session.query(Watched_Objects).get(id)
-    if result.authorid == watch_userid:
+    if result and result.authorid == watch_userid:
         db.session.delete(result)
         db.session.commit()
+        return {'ok': True}
+    else:
+        return None
 
 def list_watched_users(watch_userid):
     db.session.query(Watched_Users).filter(Watched_Users.authorid == watch_userid).all()
@@ -104,22 +123,28 @@ def list_watched_objects(watch_userid):
     return db.session.query(Watched_Objects).filter(Watched_Objects.authorid == watch_userid).all()
 
 def list_watched_users_events(watch_userid):
-    db.session.query(History_Users).filter(History_Users.wid == watch_userid).all()
+    return db.session.query(History_Users).filter(History_Users.wid == watch_userid).all()
 
 def list_watched_objects_events(watch_userid):
-    db.session.query(History_Objects).filter(History_Objects.wid == watch_userid).all()
+    return db.session.query(History_Objects).filter(History_Objects.wid == watch_userid).all()
 
 def remove_watched_user_event(eventid, watch_userid):
-    result = db.session.query(History_Users).get(id)
-    if result.authorid == watch_userid:
+    result = db.session.query(History_Users).get(eventid)
+    if result and result.authorid == watch_userid:
         db.session.delete(result)
         db.session.commit()
+        return {'ok': True}
+    else:
+        return None
 
 def remove_watched_object_event(eventid, watch_userid):
-    result = db.session.query(History_Objects).get(id)
-    if result.authorid == watch_userid:
+    result = db.session.query(History_Objects).get(eventid)
+    if result and result.authorid == watch_userid:
         db.session.delete(result)
         db.session.commit()
+        return {'ok': True}
+    else:
+        return None
 
 def render_json(data):
     return {'data': data}
@@ -127,17 +152,15 @@ def render_json(data):
 def render_error():
     return {'error': True}
 
-@app.route('/<interface>/<kind>')
-@app.route('/<interface>/<kind>/<id>')
-@login_required
-def api_action(interface, kind, id=None):
-    if interface not in ['api', 'html']:
-        return 'API interface not allowed; use api or html', 400
+
+def api_action(kind, id=None, request_object=None):
     if kind not in ['user', 'userevent', 'object', 'objectevent']:
         return 'API kind not allowed; use user or object', 400
+    if not request_object:
+        request_object = request
 
     # check user auth here
-    if request.method == 'GET':
+    if request_object.method == 'GET':
         if kind == 'user':
             result = list_watched_users(current_user.id)
         elif kind == 'object':
@@ -146,61 +169,57 @@ def api_action(interface, kind, id=None):
             result = list_watched_users_events(current_user.id)
         elif kind == 'objectevent':
             result = list_watched_objects_events(current_user.id)
-        if interface == 'api':
-            return render_json ( result ) if result is not None else render_error()
-        else:
-            return render_template (_ , data=result )
 
-    elif request.method == 'PUT':
+    elif request_object.method == 'PUT':
         if id is not None:
             return 'Do not specify an id on put', 400
         if kind == 'user':
-            result = add_watched_user(request.get('element'), request.get('reason'), current_user.username, current_user.id, request.get('email'))
+            result = add_watched_user(request_object.get('element'), request_object.get('reason'), current_user.username, current_user.id, request_object.get('email'))
         elif kind == 'object':
-            result = add_watched_object(request.get('element'), request.get('reason'), current_user.username, current_user.id, request.get('email'))
+            result = add_watched_object(request_object.get('element'), request_object.get('reason'), current_user.username, current_user.id, request_object.get('email'))
         else:
             return 'API kind not allowed for event', 400
-        if interface == 'api':
-            return render_json ( result) if result is not None else render_error()
-        else:
-            return redirect_to('/html/list/%s' % (kind))
 
-    elif request.method == 'PATCH':
+    elif request_object.method == 'PATCH':
         if id is None:
             return '%s ID needed to patch' % (kind,), 400
         if kind == 'user':
-            result = edit_watched_user(request.get('element'), request.get('reason'), current_user.id, request.get('email'))
+            result = edit_watched_user(request_object.get('element'), request_object.get('reason'), current_user.id, request_object.get('email'))
         elif kind == 'object':
-            result = edit_watched_object(request.get('element'), request.get('reason'), current_user.id, request.get('email'))
+            result = edit_watched_object(request_object.get('element'), request_object.get('reason'), current_user.id, request_object.get('email'))
         else:
             return 'API kind not allowed for event', 400
-        if interface == 'api':
-            return render_json ( result) if result is not None else render_error()
-        else:
-            return redirect_to('/html/list/%s' % (kind))
 
-    elif request.method == 'DELETE':
+    elif request_object.method == 'DELETE':
         if id is None:
             return '%s ID needed to delete' % (kind,), 400
         if kind == 'user':
-            remove_watched_user(request.get('element'), current_user.id)
+            result = remove_watched_user(id, current_user.id)
         elif kind == 'user':
-            remove_watched_object(request.get('element'), current_user.id)
+            result = remove_watched_object(id, current_user.id)
         elif kind == 'userevent':
-            remove_watched_user_event(request.get('element'), current_user.id)
+            result = remove_watched_user_event(id, current_user.id)
         elif kind == 'objectevent':
-            remove_watched_object_event(request.get('element'), current_user.id)
-        if interface == 'api':
-            return render_json( result) if result is not None else render_error()
-        else:
-            return redirect_to('/html/list/%s' % (kind))
+            result = remove_watched_object_event(id, current_user.id)
 
     else:
         return 'Invalid method; only PUT, PATCH, or DELETE.', 405
 
+    return render_json(result) if result is not None else render_error()
 
-@app.route('/web/<action>/<kind>')
-@app.route('/web/<action>/<kind>/<id>')
+
+@app.route('/api/<kind>')
+@app.route('/api/<kind>/<id>', methods=['GET', 'PUT', 'UPDATE', 'DELETE'])
+@login_required
+def api(kind, id=None):
+    if kind not in ['user', 'object', 'userevent', 'objectevent']:
+        return 'View kind not allowed; use user or object', 400
+
+    return api_action(kind, id, request)
+
+
+@app.route('/html/<action>/<kind>')
+@app.route('/html/<action>/<kind>/<id>')
 @login_required
 def action(action, kind, id=None):
     if action not in ['list', 'add', 'edit', 'delete']:
@@ -221,10 +240,14 @@ def action(action, kind, id=None):
             return flask.render_template('add.html', form=form, url_type=kind)
 
     elif action == 'edit':
-        pass
+        if id is not None:
+            return 'You must specify an id on edit', 400
 
     elif action == 'delete':
-        pass
+        if id is not None:
+            return 'You must specify an id on edit', 400
+
+    return api_action(kind, id, request)
         
 
 @app.route('/login')
