@@ -2,4 +2,5 @@ authlib
 flask
 flask-sqlalchemy
 flask-login
+osm_hall_monitor
 psycopg2-binary
