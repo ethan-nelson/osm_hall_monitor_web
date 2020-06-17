@@ -3,17 +3,17 @@
     <div>
         Users:
         <ul>
-            <li>User activity list</li>
-            <li>Users watched by you</li>
-            <li>Add a user</li>
+            <li><a href="{{ url_for('html', action='list', kind='userevent') }}">User activity list</a></li>
+            <li><a href="{{ url_for('html', action='list', kind='user') }}">Users watched by you</a></li>
+            <li><a href="{{ url_for('html', action='add', kind='user') }}">Add a user</a></li>
         </ul>
     </div>
     <div>
         Objects:
         <ul>
-            <li>Object activity list</li>
-            <li>Objects watched by you</li>
-            <li>Add an object</li>
+            <li><a href="{{ url_for('html', action='list', kind='objectevent') }}">Object activity list</a></li>
+            <li><a href="{{ url_for('html', action='list', kind='object') }}">Objects watched by you</a></li>
+            <li><a href="{{ url_for('html', action='add', kind='object') }}">Add an object</a></li>
         </ul>
     </div>
     <div>

@@ -6,8 +6,8 @@
         <ul>
             {% if current_user.is_authenticated  %}
             <li>Hey, {{ current_user.username }}</li>
-            <li>User Activity</li>
-            <li>Object Activity</li>
+            <li><a href="{{ url_for('html', action='list', kind='userevent') }}">User Activity</a></li>
+            <li><a href="{{ url_for('html', action='list', kind='objectevent') }}">Object Activity</a></li>
             <li><a href="{{ url_for('logout') }}">Logout</a></li>
             {% else %}
             <li><a href="{{ url_for('login') }}">Login</a></li>
